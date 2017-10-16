@@ -3,30 +3,31 @@
 import sys
 from pythonpddl import pddl
 
-def adjust_til(problem, time_adjustment):
+def adjust_pddl_til(problem, time_adjustment):
     for el in problem.initialstate:
         if isinstance(el, pddl.TimedFormula):
             el.timespecifier = max(0, el.timespecifier - time_adjustment)            
+
+
+def adjust_til(domain_path, problem_path, adjustment, adjusted_problem_path):
+    (_,problem) = pddl.parseDomainAndProblem(domain_path, problem_path)
+    adjust_pddl_til(problem, adjustment)
+    
+    with open(adjusted_problem_path, 'w') as adjusted_problem:
+        adjusted_problem.write(problem.asPDDL())
+    
 
 def main():
     if len(sys.argv) < 4:
         print("Usage: pddl.py <domain> <problem> <til_adjustment> <new_problem>")
         return
 
-    domainfile = sys.argv[1]
-    problemfile = sys.argv[2]
+    domain_path = sys.argv[1]
+    problem_path = sys.argv[2]
     adjustment = float(sys.argv[3])
-    
-    (_,prob) = pddl.parseDomainAndProblem(domainfile, problemfile)
-    adjust_til(prob, adjustment)
-    
-    new_problem = sys.argv[4]
-    
-    np = open(new_problem, 'w')
-    np.write(prob.asPDDL())
-    np.close()
-    
-    
+    adjusted_problem_path = sys.argv[4]
+
+    adjust_til(domain_path, problem_path, adjustment, adjusted_problem_path)
     
     #for a in dom.actions:
     #    for b in [False, True]:
